@@ -14,6 +14,9 @@ const envSchema = z
     SMTP_USER: z.string().min(1, 'SMTP_USER cannot be empty'),
     SMTP_PASS: z.string().min(1, 'SMTP_PASS cannot be empty'),
     SMTP_FROM: z.string().min(1, 'SMTP_FROM cannot be empty'),
+    LOGO_URL: z.string().min(1, 'LOGO_URL cannot be empty'),
+    APP_NAME: z.string().min(1, 'APP_NAME cannot be empty'),
+    APP_URL: z.string().min(1, 'APP_URL cannot be empty'),
   })
   .required();
 
@@ -37,4 +40,7 @@ export const envs = {
   smtpUser: parsedEnv.data.SMTP_USER,
   smtpPass: parsedEnv.data.SMTP_PASS,
   smtpFrom: parsedEnv.data.SMTP_FROM,
+  logoUrl: parsedEnv.data.LOGO_URL,
+  appName: parsedEnv.data.APP_NAME,
+  appUrl: parsedEnv.data.APP_URL,
 };

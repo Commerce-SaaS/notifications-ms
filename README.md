@@ -1,98 +1,252 @@
+<h1 align="center">📧 Notifications Microservice · <code>notifications-ms</code></h1>
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <b>NestJS microservice</b> that consumes RabbitMQ events and sends transactional emails<br/>
+  through <b>SMTP</b> using <b>Handlebars</b> templates.
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <img src="https://img.shields.io/badge/NestJS-11-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/RabbitMQ-events-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" />
+  <img src="https://img.shields.io/badge/Nodemailer-SMTP-30B980?style=for-the-badge&logo=minutemailer&logoColor=white" />
+  <img src="https://img.shields.io/badge/Handlebars-templates-f0772b?style=for-the-badge&logo=handlebarsdotjs&logoColor=black" />
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+<p align="center">
+  <img src="https://img.shields.io/badge/Transport-RabbitMQ%20only%20(no%20HTTP)-orange?style=flat-square" />
+  <img src="https://img.shields.io/badge/Role-pure%20event%20consumer-8A2BE2?style=flat-square" />
+  <img src="https://img.shields.io/badge/Database-none-lightgrey?style=flat-square" />
+  <img src="https://img.shields.io/badge/Stateless-yes-2E7D32?style=flat-square" />
+</p>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+<br/>
 
-## Project setup
+## 📌 Purpose
 
-```bash
-$ npm install
+`notifications-ms` is a **message-driven NestJS microservice** handling transactional email notifications across the platform. It consumes events from **RabbitMQ**, processes the payloads, renders dynamic templates with **Handlebars**, and sends emails through an SMTP provider.
+
+**Main responsibilities:** 📩 password reset · ✉️ email verification · 🔄 email change notifications · 🏢 SaaS organization emails · 👤 customer emails.
+
+| Characteristic | |
+|---|:---:|
+| RabbitMQ event consumer | ✅ |
+| Handlebars-based templates | ✅ |
+| SMTP provider agnostic | ✅ |
+| Stateless service | ✅ |
+| HTTP REST API | ❌ |
+| Database dependency | ❌ |
+
+<br/>
+
+## 🏗️ Architecture
+
+```mermaid
+flowchart TB
+    OTHER["🌐 Other services"] -. "RabbitMQ events (one-way)" .-> NOTIF["📧 notifications-ms<br/><i>NestJS microservice — no HTTP, no DB</i>"]
+    NOTIF -->|"render"| HBS["🧩 Handlebars templates"]
+    HBS -->|"SMTP"| MAIL["📨 Email delivery"]
 ```
 
-## Compile and run the project
+<br/>
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| **NestJS 11** | Microservice framework |
+| `@nestjs/microservices` | RabbitMQ transport |
+| **RabbitMQ** · `amqplib` · `amqp-connection-manager` | Event broker + connection management |
+| `@nestjs-modules/mailer` · **Nodemailer** | Email module + SMTP delivery |
+| **Handlebars** | Email template engine |
+| **Zod** | Environment validation |
+| `class-validator` · `class-transformer` | DTO validation / transformation |
+| **Jest** | Testing framework |
+
+<br/>
+
+## 📦 Installation & Running
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+| Mode | Command |
+|---|---|
+| 🧑‍💻 Development | `npm run start:dev` |
+| 🐞 Debug | `npm run start:debug` |
+| 🚀 Production | `npm run build && npm run start:prod` |
+
+> [!IMPORTANT]
+> This service does **not** expose any REST API. It starts exclusively via `NestFactory.createMicroservice()` — no HTTP controllers, no REST endpoints, no `app.listen()`. The `PORT` env var is used only for startup logging (`Notifications Microservice is running on port XXXX`); it does not bind an HTTP server.
+
+<br/>
+
+## 🐳 Docker
+
+The root `docker-compose.yml` runs this service with container port `4005`, `Dockerfile: EXPOSE 4005`, command `npm run start:dev`.
+
+> [!NOTE]
+> The exposed Docker port is **metadata only** — the service communicates exclusively through RabbitMQ and no HTTP traffic is expected.
+
+<br/>
+
+## 🧪 Testing
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run test
+npm run test:watch
+npm run test:cov
+npm run test:debug
+npm run test:e2e
 ```
 
-## Deployment
+> [!WARNING]
+> **Tests are not implemented yet** — no `*.spec.ts` files, no `test/` directory, no `jest-e2e.json`. The Jest scripts are currently scaffolding only.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+<br/>
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🔐 Environment Variables
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+Validated at startup using `src/config/envs.ts` — **the application fails during bootstrap if required variables are missing.**
+
+| Variable | Required | Description |
+|---|:---:|---|
+| `NODE_ENV` | ✅ | Runtime environment (`development`, `production`, `test`) |
+| `PORT` | ❌ | Startup log only |
+| `RABBITMQ_URL` | ✅ | RabbitMQ connection URL |
+| `RMQ_EVENTS_QUEUE` | ✅ | RabbitMQ queue name |
+| `SMTP_HOST` | ✅ | SMTP server hostname |
+| `SMTP_PORT` | ❌ | SMTP server port |
+| `SMTP_USER` | ✅ | SMTP username |
+| `SMTP_PASS` | ✅ | SMTP password |
+| `SMTP_FROM` | ✅ | Default sender email |
+| `LOGO_URL` | ✅ | SaaS email logo URL |
+| `APP_NAME` | ✅ | SaaS application name |
+| `APP_URL` | ✅ | SaaS application URL |
+
+<details>
+<summary><b>📄 Example <code>.env</code></b></summary>
+
+<br/>
+
+```env
+NODE_ENV=development
+
+RABBITMQ_URL=amqp://localhost:5672
+RMQ_EVENTS_QUEUE=events.notifications
+
+SMTP_HOST=smtp.example.com
+SMTP_PORT=465
+SMTP_USER=user@example.com
+SMTP_PASS=password
+SMTP_FROM=no-reply@example.com
+
+LOGO_URL=https://example.com/logo.png
+APP_NAME=My SaaS Platform
+APP_URL=https://example.com
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+</details>
 
-## Resources
+<br/>
 
-Check out a few resources that may come in handy when working with NestJS:
+## 📨 RabbitMQ Events
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Transport `Transport.RMQ`, configured via `RABBITMQ_URL` + `RMQ_EVENTS_QUEUE`. The queue is `durable: true`. Events are consumed using `@EventPattern()` — these are **one-way events, no RPC response is expected**.
 
-## Support
+Patterns live in `src/custom-mailer/patterns/mailer_patterns.ts`; handlers in `src/custom-mailer/custom-mailer.controller.ts`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+| Event Pattern | Handler | Description |
+|---|---|---|
+| `forgot_password.saas` | `forgotPasswordSaaS` | SaaS password reset |
+| `forgot_password.customer` | `forgotPasswordCustomer` | Customer password reset |
+| `verify_email.saas` | `verifyEmailSaaS` | SaaS email verification |
+| `verify_email.customer` | `verifyEmailCustomer` | Customer email verification |
+| `saas_mailer_email_changed` | `requestEmailChangeSaaS` | SaaS email change |
+| `customer_mailer_email_changed` | `requestEmailChangeCustomer` | Customer email change |
 
-## Stay in touch
+<br/>
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## ✉️ Email Templates
 
-## License
+Located in `src/custom-mailer/templates/`:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```
+forgot-password-saas.hbs      forgot-password-customer.hbs
+verify-email-saas.hbs         verify-email-customer.hbs
+email-changed-saas.hbs        email-changed-customer.hbs
+```
+
+<details>
+<summary><b>🧩 Template engine & resolution</b></summary>
+
+<br/>
+
+- **Engine:** rendered with `HandlebarsAdapter`, configured `strict: true` — missing template variables fail fast.
+- **Resolution:** development → `src/custom-mailer/templates`; production → `dist/custom-mailer/templates`, selected via `process.env.NODE_ENV === "production"`.
+
+</details>
+
+<br/>
+
+## 🔌 External Dependencies
+
+| Dependency | Usage | Env |
+|---|---|---|
+| 🐇 **RabbitMQ** | Event consumption / queue subscription / message processing (required for startup) | `RABBITMQ_URL`, `RMQ_EVENTS_QUEUE` |
+| 📨 **SMTP server** | Sending emails — any SMTP-compatible provider (Gmail, Mailgun, SendGrid, Amazon SES, custom…) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` |
+| 🗄️ **Database** | Not used — no ORM, client, migrations, or DB env vars | — |
+
+<br/>
+
+## 📁 Project Structure
+
+```
+src/
+├── config/
+│   ├── envs.ts
+│   └── transports/
+├── custom-mailer/
+│   ├── templates/
+│   │   ├── forgot-password-saas.hbs
+│   │   ├── verify-email-saas.hbs
+│   │   └── email-changed-saas.hbs
+│   ├── custom-mailer.controller.ts
+│   ├── custom-mailer.service.ts
+│   └── patterns/
+│       └── mailer_patterns.ts
+└── main.ts
+```
+
+<br/>
+
+## 📝 TODO
+
+> [!WARNING]
+> Tracked openly and worth verifying before production.
+
+- **Tests:** add unit, integration and e2e tests; create the Jest configuration.
+- **Env example:** `.env.example` is missing `LOGO_URL`, `APP_NAME`, `APP_URL`, which are required by `src/config/envs.ts`.
+- **Dependency cleanup:** `ioredis` is in `package.json` but has no imports or usage inside `src/` — possible leftover dependency.
+- **RabbitMQ module cleanup:** `src/config/transports/rabbitmq.module.ts` contains commented code and is unused; the active RMQ config is implemented directly in `src/main.ts`.
+- **Port configuration:** `PORT` does not represent an HTTP server (startup logs only); the Docker exposed port `4005` is not bound by any HTTP listener.
+
+<br/>
+
+## ✅ Service Status
+
+| Feature | Status |
+|---|:---:|
+| RabbitMQ consumer | ✅ Implemented |
+| SMTP email delivery | ✅ Implemented |
+| Handlebars templates | ✅ Implemented |
+| SaaS email templates | ✅ Implemented |
+| Customer email templates | ✅ Implemented |
+| Database | ❌ Not required |
+| HTTP API | ❌ Not exposed |
+| Automated tests | ⚠️ Pending |
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=80&section=footer" />
+</p>
