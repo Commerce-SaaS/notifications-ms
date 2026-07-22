@@ -1,243 +1,134 @@
-# 📧 Notifications Microservice (`notifications-ms`)
+<h1 align="center">📧 Notifications Microservice · <code>notifications-ms</code></h1>
 
-> NestJS microservice responsible for consuming RabbitMQ events and sending transactional emails through SMTP using Handlebars templates.
+<p align="center">
+  <b>NestJS microservice</b> that consumes RabbitMQ events and sends transactional emails<br/>
+  through <b>SMTP</b> using <b>Handlebars</b> templates.
+</p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/NestJS-11-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/RabbitMQ-events-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" />
+  <img src="https://img.shields.io/badge/Nodemailer-SMTP-30B980?style=for-the-badge&logo=minutemailer&logoColor=white" />
+  <img src="https://img.shields.io/badge/Handlebars-templates-f0772b?style=for-the-badge&logo=handlebarsdotjs&logoColor=black" />
+</p>
 
-# 📌 Purpose
+<p align="center">
+  <img src="https://img.shields.io/badge/Transport-RabbitMQ%20only%20(no%20HTTP)-orange?style=flat-square" />
+  <img src="https://img.shields.io/badge/Role-pure%20event%20consumer-8A2BE2?style=flat-square" />
+  <img src="https://img.shields.io/badge/Database-none-lightgrey?style=flat-square" />
+  <img src="https://img.shields.io/badge/Stateless-yes-2E7D32?style=flat-square" />
+</p>
 
-`notifications-ms` is a **message-driven NestJS microservice** responsible for handling transactional email notifications across the platform.
+<br/>
 
-The service consumes events from **RabbitMQ**, processes the incoming payloads, renders dynamic templates using **Handlebars**, and sends emails through an SMTP provider.
+## 📌 Purpose
 
-## Main responsibilities
+`notifications-ms` is a **message-driven NestJS microservice** handling transactional email notifications across the platform. It consumes events from **RabbitMQ**, processes the payloads, renders dynamic templates with **Handlebars**, and sends emails through an SMTP provider.
 
-- 📩 Password reset emails
-- ✉️ Email verification emails
-- 🔄 Email change notifications
-- 🏢 SaaS organization emails
-- 👤 Customer emails
+**Main responsibilities:** 📩 password reset · ✉️ email verification · 🔄 email change notifications · 🏢 SaaS organization emails · 👤 customer emails.
 
-## Service characteristics
+| Characteristic | |
+|---|:---:|
+| RabbitMQ event consumer | ✅ |
+| Handlebars-based templates | ✅ |
+| SMTP provider agnostic | ✅ |
+| Stateless service | ✅ |
+| HTTP REST API | ❌ |
+| Database dependency | ❌ |
 
-✅ RabbitMQ event consumer  
-✅ No HTTP REST API  
-✅ No database dependency  
-✅ Stateless service  
-✅ Handlebars-based templates  
-✅ SMTP provider agnostic  
+<br/>
 
----
+## 🏗️ Architecture
 
-# 🏗️ Architecture
-
-```
-                 ┌─────────────────┐
-                 │ Other Services  │
-                 └────────┬────────┘
-                          │
-                          │ RabbitMQ Events
-                          ▼
-              ┌─────────────────────┐
-              │   notifications-ms  │
-              │                     │
-              │ NestJS Microservice │
-              └─────────┬───────────┘
-                        │
-                        │ Template Rendering
-                        ▼
-              ┌─────────────────────┐
-              │     Handlebars      │
-              │  Email Templates    │
-              └─────────┬───────────┘
-                        │
-                        │ SMTP
-                        ▼
-                    📧 Email
+```mermaid
+flowchart TB
+    OTHER["🌐 Other services"] -. "RabbitMQ events (one-way)" .-> NOTIF["📧 notifications-ms<br/><i>NestJS microservice — no HTTP, no DB</i>"]
+    NOTIF -->|"render"| HBS["🧩 Handlebars templates"]
+    HBS -->|"SMTP"| MAIL["📨 Email delivery"]
 ```
 
----
+<br/>
 
-# 🛠️ Tech Stack
+## 🛠️ Tech Stack
 
 | Technology | Purpose |
 |---|---|
-| NestJS 11 | Microservice framework |
+| **NestJS 11** | Microservice framework |
 | `@nestjs/microservices` | RabbitMQ transport |
-| RabbitMQ | Event broker |
-| `amqplib` | RabbitMQ client |
-| `amqp-connection-manager` | RMQ connection management |
-| `@nestjs-modules/mailer` | Email module |
-| Nodemailer | SMTP email delivery |
-| Handlebars | Email template engine |
-| Zod | Environment validation |
-| class-validator | DTO validation |
-| class-transformer | DTO transformation |
-| Jest | Testing framework |
+| **RabbitMQ** · `amqplib` · `amqp-connection-manager` | Event broker + connection management |
+| `@nestjs-modules/mailer` · **Nodemailer** | Email module + SMTP delivery |
+| **Handlebars** | Email template engine |
+| **Zod** | Environment validation |
+| `class-validator` · `class-transformer` | DTO validation / transformation |
+| **Jest** | Testing framework |
 
----
+<br/>
 
-# 📦 Installation
-
-Install dependencies:
+## 📦 Installation & Running
 
 ```bash
 npm install
 ```
 
----
+| Mode | Command |
+|---|---|
+| 🧑‍💻 Development | `npm run start:dev` |
+| 🐞 Debug | `npm run start:debug` |
+| 🚀 Production | `npm run build && npm run start:prod` |
 
-# ▶️ Running Locally
+> [!IMPORTANT]
+> This service does **not** expose any REST API. It starts exclusively via `NestFactory.createMicroservice()` — no HTTP controllers, no REST endpoints, no `app.listen()`. The `PORT` env var is used only for startup logging (`Notifications Microservice is running on port XXXX`); it does not bind an HTTP server.
 
-## Development mode
+<br/>
 
-```bash
-npm run start:dev
-```
+## 🐳 Docker
 
-## Debug mode
+The root `docker-compose.yml` runs this service with container port `4005`, `Dockerfile: EXPOSE 4005`, command `npm run start:dev`.
 
-```bash
-npm run start:debug
-```
+> [!NOTE]
+> The exposed Docker port is **metadata only** — the service communicates exclusively through RabbitMQ and no HTTP traffic is expected.
 
-## Production
+<br/>
 
-Build:
-
-```bash
-npm run build
-```
-
-Start:
-
-```bash
-npm run start:prod
-```
-
----
-
-# ⚠️ Important: No HTTP API
-
-This service does **not expose any REST API**.
-
-It is started exclusively as a NestJS microservice:
-
-```ts
-NestFactory.createMicroservice()
-```
-
-There is:
-
-- ❌ No HTTP controllers
-- ❌ No REST endpoints
-- ❌ No `app.listen()`
-
-The `PORT` environment variable is only used for startup logging:
-
-```
-Notifications Microservice is running on port XXXX
-```
-
-It does not bind an HTTP server.
-
----
-
-# 🐳 Docker
-
-The root `docker-compose.yml` runs this service as:
-
-```
-notifications-ms
-
-├── Container port: 4005
-├── Dockerfile: EXPOSE 4005
-└── Command: npm run start:dev
-```
-
-The exposed Docker port is only metadata.
-
-The service communicates exclusively through:
-
-```
-notifications-ms
-        |
-        |
-     RabbitMQ
-```
-
-No HTTP traffic is expected.
-
----
-
-# 🧪 Testing
-
-Available scripts:
+## 🧪 Testing
 
 ```bash
 npm run test
-```
-
-```bash
 npm run test:watch
-```
-
-```bash
 npm run test:cov
-```
-
-```bash
 npm run test:debug
-```
-
-```bash
 npm run test:e2e
 ```
 
-## Current status
+> [!WARNING]
+> **Tests are not implemented yet** — no `*.spec.ts` files, no `test/` directory, no `jest-e2e.json`. The Jest scripts are currently scaffolding only.
 
-⚠️ Tests are not implemented yet.
+<br/>
 
-Current repository state:
+## 🔐 Environment Variables
 
-```
-❌ No *.spec.ts files
-❌ No test directory
-❌ No jest-e2e.json configuration
-```
+Validated at startup using `src/config/envs.ts` — **the application fails during bootstrap if required variables are missing.**
 
-The Jest scripts are currently scaffolding only.
+| Variable | Required | Description |
+|---|:---:|---|
+| `NODE_ENV` | ✅ | Runtime environment (`development`, `production`, `test`) |
+| `PORT` | ❌ | Startup log only |
+| `RABBITMQ_URL` | ✅ | RabbitMQ connection URL |
+| `RMQ_EVENTS_QUEUE` | ✅ | RabbitMQ queue name |
+| `SMTP_HOST` | ✅ | SMTP server hostname |
+| `SMTP_PORT` | ❌ | SMTP server port |
+| `SMTP_USER` | ✅ | SMTP username |
+| `SMTP_PASS` | ✅ | SMTP password |
+| `SMTP_FROM` | ✅ | Default sender email |
+| `LOGO_URL` | ✅ | SaaS email logo URL |
+| `APP_NAME` | ✅ | SaaS application name |
+| `APP_URL` | ✅ | SaaS application URL |
 
----
+<details>
+<summary><b>📄 Example <code>.env</code></b></summary>
 
-# 🔐 Environment Variables
-
-Environment variables are validated at startup using:
-
-```
-src/config/envs.ts
-```
-
-The application will fail during bootstrap if required variables are missing.
-
-| Variable | Description | Required |
-|---|---|---|
-| `NODE_ENV` | Runtime environment (`development`, `production`, `test`) | ✅ |
-| `PORT` | Startup log only | ❌ |
-| `RABBITMQ_URL` | RabbitMQ connection URL | ✅ |
-| `RMQ_EVENTS_QUEUE` | RabbitMQ queue name | ✅ |
-| `SMTP_HOST` | SMTP server hostname | ✅ |
-| `SMTP_PORT` | SMTP server port | ❌ |
-| `SMTP_USER` | SMTP username | ✅ |
-| `SMTP_PASS` | SMTP password | ✅ |
-| `SMTP_FROM` | Default sender email | ✅ |
-| `LOGO_URL` | SaaS email logo URL | ✅ |
-| `APP_NAME` | SaaS application name | ✅ |
-| `APP_URL` | SaaS application URL | ✅ |
-
----
-
-# Example `.env`
+<br/>
 
 ```env
 NODE_ENV=development
@@ -256,54 +147,15 @@ APP_NAME=My SaaS Platform
 APP_URL=https://example.com
 ```
 
----
+</details>
 
-# 📨 RabbitMQ Events
+<br/>
 
-Transport:
+## 📨 RabbitMQ Events
 
-```
-RabbitMQ (Transport.RMQ)
-```
+Transport `Transport.RMQ`, configured via `RABBITMQ_URL` + `RMQ_EVENTS_QUEUE`. The queue is `durable: true`. Events are consumed using `@EventPattern()` — these are **one-way events, no RPC response is expected**.
 
-Configuration:
-
-```env
-RABBITMQ_URL
-RMQ_EVENTS_QUEUE
-```
-
-The queue is durable:
-
-```ts
-durable: true
-```
-
-Events are consumed using:
-
-```ts
-@EventPattern()
-```
-
-These are one-way events.
-
-No RPC response is expected.
-
----
-
-# 📬 Consumed Message Patterns
-
-Location:
-
-```
-src/custom-mailer/patterns/mailer_patterns.ts
-```
-
-Handlers:
-
-```
-src/custom-mailer/custom-mailer.controller.ts
-```
+Patterns live in `src/custom-mailer/patterns/mailer_patterns.ts`; handlers in `src/custom-mailer/custom-mailer.controller.ts`.
 
 | Event Pattern | Handler | Description |
 |---|---|---|
@@ -314,243 +166,78 @@ src/custom-mailer/custom-mailer.controller.ts
 | `saas_mailer_email_changed` | `requestEmailChangeSaaS` | SaaS email change |
 | `customer_mailer_email_changed` | `requestEmailChangeCustomer` | Customer email change |
 
----
+<br/>
 
-# ✉️ Email Templates
+## ✉️ Email Templates
 
-Templates are located at:
-
-```
-src/custom-mailer/templates/
-```
-
-Available templates:
+Located in `src/custom-mailer/templates/`:
 
 ```
-forgot-password-saas.hbs
-forgot-password-customer.hbs
-
-verify-email-saas.hbs
-verify-email-customer.hbs
-
-email-changed-saas.hbs
-email-changed-customer.hbs
+forgot-password-saas.hbs      forgot-password-customer.hbs
+verify-email-saas.hbs         verify-email-customer.hbs
+email-changed-saas.hbs        email-changed-customer.hbs
 ```
 
----
+<details>
+<summary><b>🧩 Template engine & resolution</b></summary>
 
-## Template Engine
+<br/>
 
-Templates are rendered using:
+- **Engine:** rendered with `HandlebarsAdapter`, configured `strict: true` — missing template variables fail fast.
+- **Resolution:** development → `src/custom-mailer/templates`; production → `dist/custom-mailer/templates`, selected via `process.env.NODE_ENV === "production"`.
 
-```ts
-HandlebarsAdapter
-```
+</details>
 
-Configuration:
+<br/>
 
-```ts
-strict: true
-```
+## 🔌 External Dependencies
 
-This ensures missing template variables fail fast.
+| Dependency | Usage | Env |
+|---|---|---|
+| 🐇 **RabbitMQ** | Event consumption / queue subscription / message processing (required for startup) | `RABBITMQ_URL`, `RMQ_EVENTS_QUEUE` |
+| 📨 **SMTP server** | Sending emails — any SMTP-compatible provider (Gmail, Mailgun, SendGrid, Amazon SES, custom…) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` |
+| 🗄️ **Database** | Not used — no ORM, client, migrations, or DB env vars | — |
 
----
+<br/>
 
-## Template Resolution
-
-Development:
-
-```
-src/custom-mailer/templates
-```
-
-Production:
+## 📁 Project Structure
 
 ```
-dist/custom-mailer/templates
-```
-
-Selected using:
-
-```ts
-process.env.NODE_ENV === "production"
-```
-
----
-
-# 🔌 External Dependencies
-
-## RabbitMQ
-
-Required for application startup.
-
-Used for:
-
-- Event consumption
-- Queue subscription
-- Message processing
-
-Environment:
-
-```env
-RABBITMQ_URL
-RMQ_EVENTS_QUEUE
-```
-
----
-
-## SMTP Server
-
-Required for sending emails.
-
-Configuration:
-
-```env
-SMTP_HOST
-SMTP_PORT
-SMTP_USER
-SMTP_PASS
-SMTP_FROM
-```
-
-Any SMTP-compatible provider can be used.
-
-Examples:
-
-- Gmail SMTP
-- Mailgun
-- SendGrid SMTP
-- Amazon SES SMTP
-- Custom SMTP servers
-
----
-
-## Database
-
-This service does not use persistence.
-
-Confirmed:
-
-```
-❌ No ORM
-❌ No database client
-❌ No migrations
-❌ No database environment variables
-```
-
----
-
-# 📁 Project Structure
-
-```
-src
-│
-├── config
+src/
+├── config/
 │   ├── envs.ts
-│   └── transports
-│
-├── custom-mailer
-│   │
-│   ├── templates
+│   └── transports/
+├── custom-mailer/
+│   ├── templates/
 │   │   ├── forgot-password-saas.hbs
 │   │   ├── verify-email-saas.hbs
 │   │   └── email-changed-saas.hbs
-│   │
 │   ├── custom-mailer.controller.ts
 │   ├── custom-mailer.service.ts
-│   └── patterns
+│   └── patterns/
 │       └── mailer_patterns.ts
-│
 └── main.ts
 ```
 
----
+<br/>
 
-# 📝 TODO
+## 📝 TODO
 
-## Tests
+> [!WARNING]
+> Tracked openly and worth verifying before production.
 
-- Add unit tests
-- Add integration tests
-- Add e2e tests
-- Create Jest configuration
+- **Tests:** add unit, integration and e2e tests; create the Jest configuration.
+- **Env example:** `.env.example` is missing `LOGO_URL`, `APP_NAME`, `APP_URL`, which are required by `src/config/envs.ts`.
+- **Dependency cleanup:** `ioredis` is in `package.json` but has no imports or usage inside `src/` — possible leftover dependency.
+- **RabbitMQ module cleanup:** `src/config/transports/rabbitmq.module.ts` contains commented code and is unused; the active RMQ config is implemented directly in `src/main.ts`.
+- **Port configuration:** `PORT` does not represent an HTTP server (startup logs only); the Docker exposed port `4005` is not bound by any HTTP listener.
 
----
+<br/>
 
-## Environment Example
-
-`.env.example` is missing:
-
-```env
-LOGO_URL
-APP_NAME
-APP_URL
-```
-
-These variables are required by:
-
-```
-src/config/envs.ts
-```
-
----
-
-## Dependencies Cleanup
-
-`ioredis` exists in `package.json` but currently:
-
-- ❌ No imports
-- ❌ No usage inside `src/`
-
-Possible leftover dependency.
-
----
-
-## RabbitMQ Module Cleanup
-
-File:
-
-```
-src/config/transports/rabbitmq.module.ts
-```
-
-contains commented code and is currently unused.
-
-The active RabbitMQ configuration is directly implemented in:
-
-```
-src/main.ts
-```
-
----
-
-## Port Configuration
-
-Currently:
-
-```env
-PORT
-```
-
-does not represent an HTTP server.
-
-It is only used in startup logs.
-
-The Docker exposed port:
-
-```
-4005
-```
-
-is not bound by any HTTP listener.
-
----
-
-# ✅ Service Status
+## ✅ Service Status
 
 | Feature | Status |
-|---|---|
+|---|:---:|
 | RabbitMQ consumer | ✅ Implemented |
 | SMTP email delivery | ✅ Implemented |
 | Handlebars templates | ✅ Implemented |
@@ -559,3 +246,7 @@ is not bound by any HTTP listener.
 | Database | ❌ Not required |
 | HTTP API | ❌ Not exposed |
 | Automated tests | ⚠️ Pending |
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=80&section=footer" />
+</p>
